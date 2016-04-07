@@ -18,7 +18,9 @@ class RavenAuth {
     public function user() {
         $ret = $this->webauth->callback();
         if (!$ret || !$this->webauth->success()) {
-            throw new Exception('UCamWebAuth: ' . $this->webauth->status() . $this->webauth->msg());
+            if (!in_array($this->webauth->status(), ['410'])) {
+                throw new Exception('UCamWebAuth: ' . $this->webauth->status() . $this->webauth->msg());
+            }
         } else {
             return new RavenUser($this->webauth->principal());
         }

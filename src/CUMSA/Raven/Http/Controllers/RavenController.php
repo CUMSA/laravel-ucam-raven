@@ -32,6 +32,9 @@ class RavenController extends Controller {
      */
     public function handleProviderCallback() {
         $user = $this->raven->user();
+        if (is_null($user)) {
+            return redirect('/')->with('message', 'Login cancelled');
+        }
 
         $authUser = $this->findOrCreateUser($user);
         Auth::login($authUser, true);

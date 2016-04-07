@@ -739,7 +739,6 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
             if (isset($token[$this->WLS_TOKEN_LIFE]) and $token[$this->WLS_TOKEN_LIFE] > 0 and $token[$this->WLS_TOKEN_LIFE] < $expiry) {
                 $expiry = $token[$this->WLS_TOKEN_LIFE];
             }
-            var_dump($this->session_ticket);
 
             // populate session ticket with information collected so far
 

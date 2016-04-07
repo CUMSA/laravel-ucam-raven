@@ -1,6 +1,7 @@
 <?php
 Route::group([
     'prefix' => 'auth/raven',
+    'middleware' => 'web',
 ], function () {
     Route::get('/', array(
         'as' => 'raven_login',

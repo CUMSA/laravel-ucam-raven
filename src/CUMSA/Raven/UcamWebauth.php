@@ -28,8 +28,6 @@
 // Version 0.52
 // Adapted for Laravel 5.2 by Daniel Wong, based on Gideon Farrell's modifications.
 
-// setcookie - $response->withcookie
-// Location: -> redirect
 use Log;
 
 class UcamWebauth {
@@ -195,6 +193,11 @@ class UcamWebauth {
             $this->interact = $args['interact'];
         }
 
+        if (isset($args['request'])) {
+            $this->request = $args['request'];
+        } else {
+            $this->request = request();
+        }
     }
 
     // get/set functions for agent attributes
@@ -530,6 +533,10 @@ class UcamWebauth {
         return $result;
     }
 
+    function get_cookie() {
+        return $this->request->cookie($this->full_cookie_name());
+    }
+
     function authenticate($authassertionid = NULL, $testauthonly = NULL) {
         // consistency check
 
@@ -580,16 +587,16 @@ class UcamWebauth {
 
             Log::debug('UcamWebauth: session management ON');
 
-            if (isset($_COOKIE[$this->full_cookie_name()]) and
-                $_COOKIE[$this->full_cookie_name()] != $this->TESTSTRING and
-                $_COOKIE[$this->full_cookie_name()] != $this->WLS_LOGOUT) {
+            if (!is_null($this->get_cookie()) and
+                $this->get_cookie() != $this->TESTSTRING and
+                $this->get_cookie() != $this->WLS_LOGOUT) {
 
                 Log::info('UcamWebauth: existing authentication cookie found',
-                    ['cookie' => rawurldecode($_COOKIE[$this->full_cookie_name()])]);
+                    ['cookie' => rawurldecode($this->get_cookie());
 
-                //$old_cookie = explode(' ', rawurldecode($_COOKIE[$this->full_cookie_name()]));
+                //$old_cookie = explode(' ', rawurldecode($this->get_cookie()));
                 //$this->session_ticket = explode('!', $old__cookie[0]);
-                $this->session_ticket = explode('!', rawurldecode($_COOKIE[$this->full_cookie_name()]));
+                $this->session_ticket = explode('!', rawurldecode($this->get_cookie()));
 
                 $values_for_verify = $this->session_ticket;
                 $sig = array_pop($values_for_verify);
@@ -608,12 +615,7 @@ class UcamWebauth {
                         if (!isset($authassertionid) or $authassertionid != $this->session_ticket[$this->SESSION_TICKET_ID]) {
                             if ($this->session_ticket[$this->SESSION_TICKET_STATUS] != '200') {
                                 if (!$testauthonly) {
-                                    setcookie($this->full_cookie_name(),
-                                        '',
-                                        1,
-                                        $this->cookie_path,
-                                        $this->cookie_domain,
-                                        $this->using_https());
+                                    cookie()->forget($this->full_cookie_name())->queue();
                                 }
 
                             }
@@ -733,8 +735,8 @@ class UcamWebauth {
             // previously and if its not there we'll probably end up in
             // a redirect loop.
 
-            if (!isset($_COOKIE[$this->full_cookie_name()]) or
-                $_COOKIE[$this->full_cookie_name()] != $this->TESTSTRING) {
+            if (!isset($this->get_cookie()) or
+                $this->get_cookie() != $this->TESTSTRING) {
                 $this->session_ticket[$this->SESSION_TICKET_STATUS] = '610';
                 $this->session_ticket[$this->SESSION_TICKET_MSG] = 'Browser is not accepting session cookie';
                 return TRUE;
@@ -765,12 +767,12 @@ class UcamWebauth {
             // End
 
             if (!$testauthonly) {
-                setcookie($this->full_cookie_name(),
+                cookie($this->full_cookie_name(),
                     $cookie,
                     0,
                     $this->cookie_path,
                     $this->cookie_domain,
-                    $this->using_https());
+                    $this->using_https())->queue();
             }
 
             Log::debug('UcamWebauth: session cookie established, redirecting...');
@@ -778,7 +780,7 @@ class UcamWebauth {
             // Clean up the URL in browser location bar, i.e., remove WLS stuff
             // in query string, and, inevitably, redo original request a second time?
             if (!$testauthonly) {
-                header('Location: ' . $token[$this->WLS_TOKEN_URL]);
+                return redirect()->to($token[$this->WLS_TOKEN_URL], 302, [], $this->using_https());
             }
 
             return FALSE;
@@ -805,7 +807,7 @@ class UcamWebauth {
                 strtolower($_SERVER['HTTP_HOST']))) {
                 Log::warning('UcamWebauth: Redirect to tidy up hostname mismatch');
                 if (!$testauthonly) {
-                    header('Location: ' . $this->url());
+                    return redirect()->to($this->url(), 302, [], $this->using_https());
                 }
 
                 return FALSE;
@@ -813,17 +815,17 @@ class UcamWebauth {
 
             Log::debug('UcamWebauth: setting pre-session cookie');
             if (!$testauthonly) {
-                setcookie($this->full_cookie_name(),
+                cookie($this->full_cookie_name(),
                     $this->TESTSTRING,
                     0,
                     $this->cookie_path,
                     $this->cookie_domain,
-                    $this->using_https());
+                    $this->using_https())->queue();
             }
 
         }
 
-        $dest = 'Location: ' . $this->auth_service .
+        $dest = $this->auth_service .
         '?ver=' . $this->PROTOCOL_VERSION .
         '&url=' . rawurlencode($this->url());
         if (isset($this->description)) {
@@ -854,7 +856,7 @@ class UcamWebauth {
         Log::debug('UcamWebauth: redirecting...');
 
         if (!$testauthonly) {
-            header($dest);
+            return redirect()->to($dest, 302, [], $this->using_https());
         }
 
         return FALSE;

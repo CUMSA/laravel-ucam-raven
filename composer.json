@@ -13,7 +13,12 @@
     ],
     "require": {
         "php": ">=5.5.9",
-        "laravel/framework": ">=5.0.0",
+        "illuminate/support": ">=5.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CUMSA\\Raven\\": "src/"
+        }
     },
     "minimum-stability": "stable"
 }

@@ -1,0 +1,19 @@
+{
+    "name": "cumsa/laravel-ucam-raven",
+    "description": "Laravel 5 package for University of Cambridge Raven integration (UCamWebauth)",
+    "keywords": ["laravel", "raven", "cambridge", "ucam"],
+    "homepage": "https://github.com/CUMSA/laravel-ucam-raven",
+    "license": "MIT",
+    "version": "0.1.0",
+    "authors": [
+        {
+            "name": "Daniel Wong",
+            "email": "wonglkd@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "laravel/framework": ">=5.0.0",
+    },
+    "minimum-stability": "stable"
+}

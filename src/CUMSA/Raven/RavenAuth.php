@@ -2,8 +2,11 @@
 namespace CUMSA\Raven;
 
 use CUMSA\Raven\RavenUser;
+use Exception;
 
 class RavenAuth {
+    protected $webauth;
+
     public function __construct(UCamWebauth $webauth) {
         $this->webauth = $webauth;
     }
@@ -14,10 +17,10 @@ class RavenAuth {
 
     public function user() {
         $ret = $this->webauth->callback();
-        } if (!$ret || !$ret->success()) {
-            throw new Exception('UCamWebAuth: ' . $ret->status() . $ret->msg());
+        if (!$ret || !$this->webauth->success()) {
+            throw new Exception('UCamWebAuth: ' . $this->webauth->status() . $this->webauth->msg());
         } else {
-            return new RavenUser($ret->principal());
+            return new RavenUser($this->webauth->principal());
         }
         return null;
     }

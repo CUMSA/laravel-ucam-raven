@@ -21,9 +21,10 @@ class RavenServiceProvider extends ServiceProvider {
      */
     public function register() {
         $this->app->singleton('CUMSA\Raven\RavenAuth', function ($app) {
-            return new RavenAuth(new UCamWebauth([
+            return new RavenAuth(new UcamWebauth([
                 'do_session' => false,
                 'hostname' => $_SERVER['HTTP_HOST'],
+                'url_callback' => url()->route('raven_callback'),
             ]));
         });
     }

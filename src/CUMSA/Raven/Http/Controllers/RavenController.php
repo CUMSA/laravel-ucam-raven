@@ -5,9 +5,16 @@ use App\Http\Controllers\Controller;
 use App\User;
 use CUMSA\Raven\RavenAuth;
 use CUMSA\Raven\RavenUser;
+use Auth;
 
 class RavenController extends Controller {
+    protected $raven;
+
     private $redirectTo = '/home';
+
+    public function __construct(RavenAuth $raven) {
+        $this->raven = $raven;
+    }
 
     /**
      * Redirect the user to the Raven authentication page.
@@ -15,8 +22,7 @@ class RavenController extends Controller {
      * @return Response
      */
     public function redirectToProvider() {
-        $raven = new RavenAuth;
-        return $auth->redirect();
+        return $this->raven->redirect();
     }
 
     /**
@@ -25,8 +31,7 @@ class RavenController extends Controller {
      * @return Response
      */
     public function handleProviderCallback() {
-        $raven = new RavenAuth;
-        $user = $raven->user();
+        $user = $this->raven->user();
 
         $authUser = $this->findOrCreateUser($user);
         Auth::login($authUser, true);
@@ -46,10 +51,11 @@ class RavenController extends Controller {
             return $authUser;
         }
 
-        return User::create([
+        $user = User::create([
             'name' => $ravenUser->crsid,
             'email' => $ravenUser->crsid . '@cam.ac.uk', // TODO: get actual stuff from lookup
-            'crsid' => $ravenUser->crsid,
         ]);
+        $user->crsid = $ravenUser->crsid;
+        return $user;
     }
 }

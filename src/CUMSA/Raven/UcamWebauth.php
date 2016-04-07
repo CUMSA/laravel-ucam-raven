@@ -28,6 +28,7 @@
 // Version 0.52
 // Adapted for Laravel 5.2 by Daniel Wong, based on Gideon Farrell's modifications.
 
+namespace CUMSA\Raven;
 use Log;
 
 class UcamWebauth {
@@ -125,7 +126,7 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
         '560' => 'Web server not authorized to use the authentication service',
         '570' => 'Operation declined by the authentication service');
 
-    function __construct($args) {
+    function __construct($args = []) {
         if (isset($args['auth_service'])) {
             $this->auth_service = $args['auth_service'];
         } else {
@@ -738,6 +739,7 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
             if (isset($token[$this->WLS_TOKEN_LIFE]) and $token[$this->WLS_TOKEN_LIFE] > 0 and $token[$this->WLS_TOKEN_LIFE] < $expiry) {
                 $expiry = $token[$this->WLS_TOKEN_LIFE];
             }
+            var_dump($this->session_ticket);
 
             // populate session ticket with information collected so far
 
@@ -749,6 +751,7 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
             $this->session_ticket[$this->SESSION_TICKET_SSO] = $token[$this->WLS_TOKEN_SSO];
             $this->session_ticket[$this->SESSION_TICKET_PARAMS] = $token[$this->WLS_TOKEN_PARAMS];
 
+            return TRUE;
             // return complete if we are not doing session management
 
             // if (!$this->do_session) {

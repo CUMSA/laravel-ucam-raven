@@ -16,8 +16,8 @@
         "illuminate/support": ">=5.0.0"
     },
     "autoload": {
-        "psr-4": {
-            "CUMSA\\Raven\\": "src/CUMSA/Raven"
+        "psr-0": {
+            "CUMSA\\Raven\\": "src/"
         }
     },
     "minimum-stability": "stable"
